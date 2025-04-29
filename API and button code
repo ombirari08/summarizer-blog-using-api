@@ -1,0 +1,63 @@
+ 
+---------------------------------------------
+Button code
+------------------------------------------
+
+<?php } else { ?>
+    <input type="hidden" id="csrf_token" name="csrf_token" value="<?= csrf_token(); ?>">
+    <button class="btn btn-warning btn-sm" id="SummarizeButton" onclick="summarizeBlog()"><i class="bi bi-stars"></i> Summarize</button>
+    <?php } ?>
+
+------------------------------------------
+id="summaryModal" 
+------------------------------------------
+<div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="summaryModalLabel">Summary</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="summaryContent">Loading summary...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+------------------------------------------
+API CODE
+------------------------------------------
+<script defer>
+function summarizeBlog() {
+    const blogContent = `<?= addslashes($blog_dt->blog_content); ?>`;  // PHP code to inject the content into JavaScript
+
+    // Fetch request to get the summary
+    fetch("http://127.0.0.1:8000/api/summarize/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ "text": blogContent })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.summary) {
+            // Insert the summary into the modal body
+            document.getElementById("summaryContent").textContent = data.summary;
+            // Use Bootstrap's modal functionality to show the modal
+            const myModal = new bootstrap.Modal(document.getElementById('summaryModal'));
+            myModal.show();
+        } else {
+            alert("Error: " + data.error || "Summary not available.");
+        }
+    })
+    .catch(error => {
+        alert("An error occurred: " + error.message);
+    });
+}
+
+</script>
